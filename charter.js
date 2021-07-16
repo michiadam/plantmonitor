@@ -1,32 +1,55 @@
 
-const ChartJSImage = require('chart.js-image');
 const { v4: uuidv4 } = require('uuid');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+
+var groupBy = function (xs, key) {
+    return xs.reduce(function (rv, x) {
+        (rv[x[key]] = rv[x[key]] || []).push(x);
+        return rv;
+    }, {});
+};
+function random_rgb() {
+    var o = Math.round, r = Math.random, s = 255;
+    return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ')';
+}
+function roundMinutes(date) {
+ 
+    date.setMinutes(date.getMinutes(), 0, 0); // Resets also seconds and milliseconds
+
+    return date;
+}
+exports.getChart = async (data) => {
 
 
-exports.getChart = async () => {
-    const line_chart = ChartJSImage().chart({
+    const width = 800; //px
+    const height = 600; //px
+    const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
+
+
+
+    let dataset = []
+    for (const [key, value] of Object.entries(groupBy(data, 'name'))) {
+        let entry = {};
+        entry.label = key;
+        entry.backgroundColor = random_rgb();
+        entry.borderColor = random_rgb();
+        data = [];
+
+        value.forEach(element => {
+            data.push({ x: roundMinutes(new Date(element["time"])).format('DD.MMM YYYY - HH:mm'), y: element["data"] });
+        });
+ 
+
+        entry.data = data; 
+
+        dataset.push(entry);
+    }
+ 
+
+    const configuration = {
         "type": "line",
         "data": {
-            "datasets": [
-                {
-                    "label": "My First dataset",
-                    "borderColor": "rgb(255,+99,+132)",
-                    "backgroundColor": "rgba(255,+99,+132,+.5)",
-                    "data": [
-                        { x: '2017-01-06 18:39:30', y: 100 },
-                        { x: '2017-01-07 18:39:28', y: 101 },
-                    ]
-                },
-                {
-                    "label": "My Second dataset",
-                    "borderColor": "rgb(54,+162,+235)",
-                    "backgroundColor": "rgba(54,+162,+235,+.5)",
-                    "data": [
-                        { x: '2017-01-07 18:00:00', y: 90 },
-                        { x: '2017-01-08 18:00:00', y: 105 },
-                    ]
-                },
-            ]
+            "datasets": dataset
         },
         "options": {
             "title": {
@@ -37,6 +60,7 @@ exports.getChart = async () => {
                 "xAxes": [
                     {
                         type: 'time',
+                        unit: 'minute',
                         time: {
                             displayFormats: {
                                 millisecond: 'DD.MMM YYYY - HH:mm',
@@ -48,17 +72,16 @@ exports.getChart = async () => {
                         display: true,
                         scaleLabel: {
                             display: true,
-                            labelString: 'Time', 
+                            labelString: 'Time',
                         }
                     }
                 ]
             }
         }
-    }) // Line chart
-        .backgroundColor('white')
-        .width(1920 / 2) // 500px
-        .height(1080 / 2);
 
-    return line_chart.toURL();
+    };
+    const dataUrl = await chartJSNodeCanvas.renderToBuffer(configuration);
+
+    return dataUrl;
 };
 

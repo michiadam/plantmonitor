@@ -1,95 +1,61 @@
-/**
-   PostHTTPClient.ino
-    Created on: 21.11.2016
-*/
+#include <WiFi.h>
+#include <HTTPClient.h>
 
-#include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
-
-/* this can be run with an emulated server on host:
-        cd esp8266-core-root-dir
-        cd tests/host
-        make ../../libraries/ESP8266WebServer/examples/PostServer/PostServer
-        bin/PostServer/PostServer
-   then put your PC's IP address in SERVER_IP below, port 9080 (instead of default 80):
-*/
-//#define SERVER_IP "10.0.1.7:9080" // PC address with emulation on host
-#define SERVER_IP "10.0.0.37"
-
-#ifndef STASSID
-#define STASSID "A1-E2E17B"
-#define STAPSK  "6Z96AX6LGA"
-#endif
+const char* serverName  =  "http://10.0.0.37/sensor";
+const char* ssid = "A1-E2E17B";
+const char* password =  "6Z96AX6LGA" ;
 
 
-#define SensorPin A0 
-float sensorValue = 0; 
+#define SensorPin 34
+int sensorValue = 0; 
 
 
 void setup() {
 
   Serial.begin(115200);
 
-  Serial.println();
-  Serial.println();
-  Serial.println();
 
-  WiFi.begin(STASSID, STAPSK);
-
-  while (WiFi.status() != WL_CONNECTED) {
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting");
+  while(WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println("");
-  Serial.print("Connected! IP address: ");
+  Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
 
-}
+} 
 
 void loop() {
-  // wait for WiFi connection
-  if ((WiFi.status() == WL_CONNECTED)) {
+  if(WiFi.status()== WL_CONNECTED){
+      HTTPClient http;
 
-    WiFiClient client;
-    HTTPClient http;
+      
+      sensorValue = analogRead(SensorPin);  
+      float value = 100.0- map(float(sensorValue), 1200.0, 3500.0, 0.0, 100.0);  
+      String returnal = "{\"name\": \"Dagobert2\", \"sensordata\": "+String(value)+"}";
+      Serial.println(returnal);
+      // Your Domain name with URL path or IP address with path
+     
+      http.begin(serverName);
 
-    Serial.print("[HTTP] begin...\n");
-    // configure traged server and url
-    http.begin(client, "http://" SERVER_IP ":3000/sensor/"); //HTTP
-    http.addHeader("Content-Type", "application/json");
+      // Specify content-type header
+      http.addHeader("Content-Type", "application/json");
+      // Data to send with HTTP POSTZ
+       // Send HTTP POST request
+      int httpResponseCode = http.POST(returnal.c_str());
+      
+ 
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+        
+      // Free resources
+      http.end();
+    } 
 
 
-  
-    Serial.print("[HTTP] POST...\n");
-    // start connection and send HTTP header and body
 
-   sensorValue = analogRead(SensorPin); 
-    
-    char buffer[50];
-    sprintf(buffer, "{sensordata: %.4}",sensorValue);
-    Serial.print(buffer);
-
-    
-    int httpCode = http.POST(buffer);
-
-    // httpCode will be negative on error
-    if (httpCode > 0) {
-      // HTTP header has been send and Server response header has been handled
-      Serial.printf("[HTTP] POST... code: %d\n", httpCode);
-
-      // file found at server
-      if (httpCode == HTTP_CODE_OK) {
-        const String& payload = http.getString();
-        Serial.println("received payload:\n<<");
-        Serial.println(payload);
-        Serial.println(">>");
-      }
-    } else {
-      Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
-    }
-
-    http.end();
-  }
-
-  delay(10000);
+     
+    delay(10000);
 }
