@@ -10,13 +10,15 @@ var groupBy = function (xs, key) {
 };
 function random_rgb() {
     var o = Math.round, r = Math.random, s = 255;
-    return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ')';
+    return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ')';
 }
 function roundMinutes(date) {
  
     date.setMinutes(date.getMinutes(), 0, 0); // Resets also seconds and milliseconds
 
-    return date;
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric',minute:'numeric' };
+
+    return date.toLocaleDateString('de-DE', options);
 }
 exports.getChart = async (data) => {
 
@@ -30,21 +32,22 @@ exports.getChart = async (data) => {
     let dataset = []
     for (const [key, value] of Object.entries(groupBy(data, 'name'))) {
         let entry = {};
-        entry.label = key;
-        entry.backgroundColor = random_rgb();
+        entry.label = key; 
         entry.borderColor = random_rgb();
         data = [];
 
         value.forEach(element => {
-            data.push({ x: roundMinutes(new Date(element["time"])).format('DD.MMM YYYY - HH:mm'), y: element["data"] });
+            data.push({ x: roundMinutes(new Date(element["time"])), y: element["data"] });
         });
  
 
-        entry.data = data; 
+        entry.data = data;
+        console.log(data);
 
         dataset.push(entry);
     }
- 
+
+    console.log(dataset);
 
     const configuration = {
         "type": "line",
