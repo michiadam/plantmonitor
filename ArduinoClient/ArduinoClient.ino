@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* serverName  =  "http://10.0.0.37/sensor";
+const char* serverName  =  "http://10.0.0.14/sensor";
 const char* ssid = "A1-E2E17B";
 const char* password =  "6Z96AX6LGA" ;
 
@@ -34,7 +34,7 @@ void loop() {
       
       sensorValue = analogRead(SensorPin);  
       float value = 100.0- map(float(sensorValue), 1200.0, 3500.0, 0.0, 100.0);  
-      String returnal = "{\"name\": \"Dagobert2\", \"sensordata\": "+String(value)+"}";
+      String returnal = "{\"name\": \"Chicken Teendie\", \"sensordata\": "+String(value)+"}";
       Serial.println(returnal);
       // Your Domain name with URL path or IP address with path
      
@@ -57,5 +57,5 @@ void loop() {
 
 
      
-    delay(10000);
+    delay(1000 * 60 * 5);
 }

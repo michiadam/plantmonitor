@@ -48,43 +48,47 @@ exports.getChart = async (data) => {
     }
 
     console.log(dataset);
-
-    const configuration = {
-        "type": "line",
-        "data": {
-            "datasets": dataset
-        },
-        "options": {
-            "title": {
-                "display": true,
-                "text": "Chart.js Line Chart"
+    dataset.forEach((set)=>{
+        const configuration = {
+            "type": "line",
+            "data": {
+                "datasets": [set]
             },
-            "scales": {
-                "xAxes": [
-                    {
-                        type: 'time',
-                        unit: 'minute',
-                        time: {
-                            displayFormats: {
-                                millisecond: 'DD.MMM YYYY - HH:mm',
-                                second: 'DD.MMM YYYY - HH:mm',
-                                minute: 'DD.MMM YYYY - HH:mm',
-                                hour: 'DD.MMM YYYY - HH:mm'
-                            }
-                        },
-                        display: true,
-                        scaleLabel: {
+            "options": {
+                "title": {
+                    "display": true,
+                    "text": "Chart.js Line Chart"
+                },
+                "scales": {
+                    "xAxes": [
+                        {
+                            type: 'time',
+                            unit: 'minute',
+                            time: {
+                                displayFormats: {
+                                    millisecond: 'DD.MMM YYYY - HH:mm',
+                                    second: 'DD.MMM YYYY - HH:mm',
+                                    minute: 'DD.MMM YYYY - HH:mm',
+                                    hour: 'DD.MMM YYYY - HH:mm'
+                                }
+                            },
                             display: true,
-                            labelString: 'Time',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Time',
+                            }
                         }
-                    }
-                ]
+                    ]
+                }
             }
-        }
-
-    };
-    const dataUrl = await chartJSNodeCanvas.renderToBuffer(configuration);
-
-    return dataUrl;
+    
+        };
+        const dataUrl = await chartJSNodeCanvas.renderToBuffer(configuration);
+    
+        bot.sendPhoto(chatId,  await chartJSNodeCanvas.renderToBuffer(configuration), {
+            caption: set.label
+        }); 
+    })
+   
 };
 
