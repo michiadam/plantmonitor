@@ -13,10 +13,10 @@ function random_rgb() {
     return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ')';
 }
 function roundMinutes(date) {
- 
+
     date.setMinutes(date.getMinutes(), 0, 0); // Resets also seconds and milliseconds
 
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric',minute:'numeric' };
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
 
     return date.toLocaleDateString('de-DE', options);
 }
@@ -33,23 +33,31 @@ exports.getChart = async (bot, chatId, data) => {
 
     for (const [key, value] of Object.entries(groupBy(data, 'name'))) {
         let entry = {};
-        entry.label = key; 
+        entry.label = key;
         entry.borderColor = random_rgb();
         data = [];
 
+        let count = 0;
+        let middle = 0;
         value.forEach(element => {
-            data.push({ x: roundMinutes(new Date(element["time"])), y: element["data"] });
+
+            middle += element["data"]
+            if (count++ == 5) {
+                data.push({ x: roundMinutes(new Date(element["time"])), y: middle / 5 });
+                count = 0;
+                middle = 0;
+            }
         });
- 
+
 
         entry.data = data;
-        
+
 
         dataset.push(entry);
     }
 
     console.log(dataset);
-    dataset.forEach(async (set)=>{
+    dataset.forEach(async (set) => {
         const configuration = {
             "type": "line",
             "data": {
@@ -82,14 +90,14 @@ exports.getChart = async (bot, chatId, data) => {
                     ]
                 }
             }
-    
+
         };
         const dataUrl = await chartJSNodeCanvas.renderToBuffer(configuration);
-    
-        bot.sendPhoto(chatId,  await chartJSNodeCanvas.renderToBuffer(configuration), {
+
+        bot.sendPhoto(chatId, await chartJSNodeCanvas.renderToBuffer(configuration), {
             caption: set.label
-        }); 
+        });
     })
-   
+
 };
 

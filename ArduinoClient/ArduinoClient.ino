@@ -6,7 +6,7 @@ const char* ssid = "A1-E2E17B";
 const char* password =  "6Z96AX6LGA" ;
 
 
-#define SensorPin 34
+#define SensorPin 35
 int sensorValue = 0; 
 
 
@@ -33,9 +33,10 @@ void loop() {
 
       
       sensorValue = analogRead(SensorPin);  
-      float value = 100.0- map(float(sensorValue), 1200.0, 3500.0, 0.0, 100.0);  
-      String returnal = "{\"name\": \"Chicken Teendie\", \"sensordata\": "+String(value)+"}";
+      float value = 100.0- map(float(sensorValue), 900.0, 1700.0, 0.0, 100.0);  
+      String returnal = "{\"name\": \"Dagobert\", \"sensordata\": "+String(value)+"}";
       Serial.println(returnal);
+      Serial.println(sensorValue);
       // Your Domain name with URL path or IP address with path
      
       http.begin(serverName);
@@ -57,5 +58,5 @@ void loop() {
 
 
      
-    delay(1000 * 60 * 5);
+    delay(1000*60);
 }
