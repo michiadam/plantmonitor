@@ -20,7 +20,7 @@ function roundMinutes(date) {
 
     return date.toLocaleDateString('de-DE', options);
 }
-exports.getChart = async (data) => {
+exports.getChart = async (bot, chatId, data) => {
 
 
     const width = 800; //px
@@ -30,6 +30,7 @@ exports.getChart = async (data) => {
 
 
     let dataset = []
+
     for (const [key, value] of Object.entries(groupBy(data, 'name'))) {
         let entry = {};
         entry.label = key; 
@@ -42,13 +43,13 @@ exports.getChart = async (data) => {
  
 
         entry.data = data;
-        console.log(data);
+        
 
         dataset.push(entry);
     }
 
     console.log(dataset);
-    dataset.forEach((set)=>{
+    dataset.forEach(async (set)=>{
         const configuration = {
             "type": "line",
             "data": {

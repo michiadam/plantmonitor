@@ -59,7 +59,7 @@ const bot = new TelegramBot(process.env.TG_TOKEN, { polling: true });
         const chatId = msg.chat.id;
 
         let entries = await storage.getItem("entries");
-        await charter.getChart(chatId,entries);
+        await charter.getChart(bot, chatId,entries);
     });
 
 })();
